@@ -33,31 +33,9 @@ public class Lexer{
   return double.Parse(result);
  } 
 
-  private Tokens.TokenType GetKeyword(string result)
-    {
-        switch (result)
-        { 
-          case "true":
-          return Tokens.TokenType.TrueKeyword;
-          case "false" :
-           return Tokens.TokenType.FalseKeyword;
-           case "in" :
-           return Tokens.TokenType.InKeyword;
-           case "while":
-           return Tokens.TokenType.WhileKeyword;
-           case "for" :
-           return Tokens.TokenType.ForKeyword;
-           
-           
-          
-          default:
-           return Tokens.TokenType.Identifier;
-        }
-    } 
+ 
    
-   
-     
-      public Tokens GetTokens()
+   public Tokens GetTokens()
       {  
           if(char.IsWhiteSpace(currentChar)){
              var start=position;
@@ -70,6 +48,7 @@ public class Lexer{
           else if(currentChar==';'){
             return new Tokens(";",position++,Tokens.TokenType.EOF, null!);
            }
+           
 
         else if(char.IsDigit(currentChar)){
             double result=Doubles();
@@ -83,7 +62,7 @@ public class Lexer{
                   result+=currentChar;
                   Advanced();
                }
-               Tokens.TokenType type= GetKeyword(result);
+               Tokens.TokenType type= Tokens.GetKeyword(result);
                return new Tokens(result,start,type,null!);
                
             }
@@ -93,6 +72,9 @@ public class Lexer{
              if(currentChar=='='){
                return new Tokens("+=",position++,Tokens.TokenType.PlusEquals, null!);
              }
+               if(currentChar=='+'){
+               return new Tokens("++",position++,Tokens.TokenType.PlusPlus, null!);
+             }
             int pos=position-1;
              return new Tokens("+",pos,Tokens.TokenType.Plus, null!);
            } 
@@ -100,6 +82,9 @@ public class Lexer{
              Advanced();
              if(currentChar=='='){
                return new Tokens("-=",position++,Tokens.TokenType.MinusEquals, null!);
+             }
+              if(currentChar=='-'){
+               return new Tokens("-=",position++,Tokens.TokenType.MinusMinus, null!);
              }
             int pos=position-1;
              return new Tokens("-",pos,Tokens.TokenType.Minus, null!);
@@ -109,10 +94,11 @@ public class Lexer{
              return new Tokens("*",position++,Tokens.TokenType.Mull, null!);
            }
           else  if(currentChar == '/'){
-           
-             
-             return new Tokens("/",position++,Tokens.TokenType.Div, null!);
+            return new Tokens("/",position++,Tokens.TokenType.Div, null!);
            } 
+            else  if(currentChar == '^'){
+               return new Tokens("^",position++,Tokens.TokenType.Pow, null!);
+           }
           else if(currentChar == '('){
              return new Tokens("(",position++,Tokens.TokenType.OpenParen, null!);
            } 
@@ -124,6 +110,12 @@ public class Lexer{
            } 
             else  if(currentChar == '}'){
              return new Tokens("}",position++,Tokens.TokenType.CloseKey, null!);
+           } 
+            else  if(currentChar == '['){
+             return new Tokens("[",position++,Tokens.TokenType.OpenBracket, null!);
+           } 
+             else  if(currentChar == ']'){
+             return new Tokens("]",position++,Tokens.TokenType.CloseBracket, null!);
            } 
              else  if(currentChar == ','){
              return new Tokens(",",position++,Tokens.TokenType.Coma, null!);
