@@ -7,9 +7,9 @@ class BinaryExpression: Expressions{
 
     public BinaryExpression(Expressions left, Tokens op, Expressions right)
     {
-        this.Left = left;
-        this.Op = op;
-        this.Right = right;
+         Left = left;
+         Op = op;
+         Right = right;
     }
 
     public override Tokens.TokenType Type => Tokens.TokenType.BinaryExpression;

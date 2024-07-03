@@ -7,15 +7,17 @@ public class WhileExpression : Expressions
     
     public Expressions BoolExpression { get; }
     
-    public Expressions Body { get; }
+    public Statement Body { get; }
 
-    public WhileExpression( Expressions boolExpression,Expressions body)
+    public WhileExpression( Expressions boolExpression,Statement body)
     {
          
         BoolExpression = boolExpression;
          
         Body = body;
-    }
+    } 
+
+    
 
     public override bool CheckSemantic()
     {

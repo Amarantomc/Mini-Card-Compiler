@@ -135,6 +135,7 @@ public class Tokens{
         PlusPlus,
         MinusMinus,
         Pow,
+        InExpression,
     }
 
     #endregion
@@ -177,10 +178,8 @@ public class Tokens{
            return  TokenType.BoolKeyword;
            case "Action" :
            return  TokenType.ActionKeyword;
-           case "targets" :
-           return  TokenType.TargetsKeyword;
-           case "context" :
-           return  TokenType.ContextKeyword;
+            
+           
            case "Power" :
            return  TokenType.PowerKeyword;
            case "Deck" :
