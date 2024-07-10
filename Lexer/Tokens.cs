@@ -136,6 +136,13 @@ public class Tokens{
         MinusMinus,
         Pow,
         InExpression,
+        VarExpression,
+        CardExpression,
+        OnActivationExpression,
+        EffectAssignmentExpression,
+        ParamsExpression,
+        SelectorExpression,
+        PostActionExpression,
     }
 
     #endregion

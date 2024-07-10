@@ -1,10 +1,14 @@
  using GWent;
- public class Statement{
+ public class Statement : Expressions{
        public Queue<Expressions> Expressions{get;set;}
        public Queue<Statement> Childrens{get;set;}
-      public Statement( ) {
+
+    public override Tokens.TokenType Type =>  Tokens.TokenType.StatementExpression;
+
+    public Statement( ) {
           Expressions=new Queue<Expressions>();
           Childrens= new Queue<Statement>();
+          
       }
 
       public Statement(params Expressions [] expressions){
@@ -16,4 +20,13 @@
          }
       }
 
- }
+    public override object Evaluate()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool CheckSemantic()
+    {
+        throw new NotImplementedException();
+    }
+}
