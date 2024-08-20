@@ -143,6 +143,11 @@ public class Tokens{
         ParamsExpression,
         SelectorExpression,
         PostActionExpression,
+        ActionExpression,
+        LambdaExpression,
+        StatementExpression,
+        EffectExpression,
+        DotExpression,
     }
 
     #endregion

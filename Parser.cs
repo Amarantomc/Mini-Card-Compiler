@@ -38,7 +38,7 @@ public class Parser{
      private Tokens Match( Tokens.TokenType type){
       
         if(CurrentToken.Type==type) return NextToken();
-         Error.ErrorList.Add(new Error(Error.ErrorType.Semantic, position, "Unexpected token"));
+         Error.ErrorList.Add(new Error(Error.ErrorType.Semantic, position, "Unexpected token "+ CurrentToken.Text));
         return new Tokens(null!, CurrentToken.Position, type, null!); 
      }
      
@@ -49,7 +49,7 @@ public class Parser{
             case Tokens.TokenType.OpenParen:
                 {
                     var openParentesis = Match(Tokens.TokenType.OpenParen);
-                    var expresion = ParseFirstExpresion();
+                    var expresion = ParseGlobalExpresion();
                     var right = Match(Tokens.TokenType.CloseParen);
                     return new ParenthesisExpression(openParentesis, expresion, right);
                 }
@@ -130,17 +130,129 @@ public class Parser{
        }
      }
 
-       private Expressions ParseFirstExpresion(){
+       private Expressions ParseGlobalExpresion(){
+         if(CurrentToken.Type == Tokens.TokenType.EffectExpression)
+         {
+
+         }
+         else if(CurrentToken.Type == Tokens.TokenType.CardExpression)
+         {
+
+         }
+         else if( CurrentToken.Type== Tokens.TokenType.ForExpression)
+         {
+             return ForExpressions();
+         }
+           else if( CurrentToken.Type== Tokens.TokenType.WhileExpression)
+         {
+            return WhileExpression();
+         }
+        
+        
         return ParseExpresion();
        }
      public SyntaxTree Parse(){
         
-      var expresion= ParseFirstExpresion();
+      var expresion= ParseGlobalExpresion();
       var EOF= Match(Tokens.TokenType.EOF);
       if(EOF.Text!=";") Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,position,"; was Expected"));
       return new SyntaxTree(expresion,EOF);
      } 
 
+     private Tokens LookAhead(int n=0){
+       return tokens[position+n];
+     }
 
-   
+     private bool CanLookAhead(int n=0){
+       return tokens.Count -position> n;
+     }
+
+    private Expressions WhileExpression(){
+
+      NextToken();
+      Match(Tokens.TokenType.OpenParen);
+      var condition=ParseExpresion();
+      Match(Tokens.TokenType.CloseParen);
+      if(CurrentToken.Type== Tokens.TokenType.OpenKey)
+      {   // statment se parsea en factor arreglar
+          return new WhileExpression(condition,(Statement)Factor());
+      }
+       var body= ParseGlobalExpresion();
+      
+      return new WhileExpression(condition,new Statement(body));
+    }
+
+    private Expressions ForExpressions(){
+       NextToken();
+       var variable= Match(Tokens.TokenType.VarExpression);
+       Match(Tokens.TokenType.InKeyword);
+       var collection=Match(Tokens.TokenType.VarExpression);
+       var inExpression= new InExpression(variable,collection);
+
+       if(CurrentToken.Type== Tokens.TokenType.OpenKey)
+       {
+         return new ForExpression(inExpression,(Statement)Factor());
+       }
+       Match(Tokens.TokenType.OpenKey);
+       return null!;
+       
+    }
+
+    private Expressions EffectExpressions(){
+      NextToken();
+      Match(Tokens.TokenType.OpenKey);
+      AssignmentExpression name=null!;
+      ParamsExpression effectParams=null!;
+      ActionExpression action=null!;
+
+      while(CurrentToken.Type!= Tokens.TokenType.CloseKey)
+      {
+           if(CurrentToken.Type == Tokens.TokenType.NameKeyword && name is null)
+           {
+              var nameToken=NextToken();
+              var op=Match(Tokens.TokenType.TwoDots);
+              name=new AssignmentExpression(nameToken,op, ParseGlobalExpresion());
+           }
+           if ( CurrentToken.Type== Tokens.TokenType.ParamsKeyword && effectParams is null)
+           {
+              NextToken();
+              Match(Tokens.TokenType.TwoDots);
+              Match(Tokens.TokenType.OpenKey);
+              List<Expressions> paramsExpression= new List<Expressions>();
+
+              while(CurrentToken.Type!= Tokens.TokenType.CloseKey)
+              {
+                var variable=Match(Tokens.TokenType.VarExpression);
+                if( CurrentToken.Type== Tokens.TokenType.TwoDots)
+                {
+                    NextToken();
+                  if( CurrentToken.Type== Tokens.TokenType.NumberKeyword ||CurrentToken.Type== Tokens.TokenType.BoolKeyword|| CurrentToken.Type== Tokens.TokenType.StringKeyword)
+                  {
+                    //paramsExpression.Add(new VarExpression(variable, CurrentToken));
+                    NextToken();
+                  } else Error.ErrorList.Add(new Error(Error.ErrorType.Semantic, CurrentToken.Position,"Invalid Type "+CurrentToken.Text));
+
+                }else Error.ErrorList.Add(new Error(Error.ErrorType.Syntax, CurrentToken.Position,"Missing :"));
+                 
+                 if(CurrentToken.Type== Tokens.TokenType.Coma) NextToken();
+                 else if( CurrentToken.Type== Tokens.TokenType.CloseKey) continue;
+                 else throw new Exception("Unexpected Token "+ CurrentToken.Text);
+
+              }
+                Match( Tokens.TokenType.CloseKey);
+                effectParams=new ParamsExpression(new Statement(paramsExpression.ToArray()));
+           }
+            if(CurrentToken.Type== Tokens.TokenType.ActionKeyword && action is null)
+            {
+              NextToken();
+              Match(Tokens.TokenType.TwoDots);
+
+            }
+
+           
+      }
+
+      return null!;
+    }
+
 }

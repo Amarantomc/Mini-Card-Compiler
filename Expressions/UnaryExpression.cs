@@ -7,8 +7,8 @@ class UnaryExpression: Expressions{
     public UnaryExpression( Tokens op, Expressions right)
     {
          
-        this.Op = op;
-        this.Right = right;
+        Op = op;
+        Right = right;
     }
 
     public override Tokens.TokenType Type => Tokens.TokenType.UnaryExpression;
