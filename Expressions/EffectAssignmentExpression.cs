@@ -5,19 +5,26 @@ public class EffectAssignmentExpression : Expressions
 {
     public override Tokens.TokenType Type =>  Tokens.TokenType.EffectAssignmentExpression;
 
-    public Expressions Name { get; }
-    public ParamsExpression Param { get; }
+    public AssignmentExpression Name { get; set; }
+    public List<AssignmentExpression> Param { get;set; }
 
-    public EffectAssignmentExpression(Expressions name, ParamsExpression param)
+    public EffectAssignmentExpression(AssignmentExpression name, List<AssignmentExpression> param)
     {
         Name = name;
         Param = param;
     }
 
-    public EffectAssignmentExpression(Expressions name)
+    public EffectAssignmentExpression(AssignmentExpression name)
     {
         Name = name;
-        Param=null!;
+        Param=new List<AssignmentExpression>();
+        
+    }
+    public EffectAssignmentExpression(){
+        Name=null!;
+        Param=new List<AssignmentExpression>();
+
+        
     }
 
 

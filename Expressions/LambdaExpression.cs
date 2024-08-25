@@ -5,15 +5,19 @@ public class LambdaExpression : Expressions
 {
     public override Tokens.TokenType Type => Tokens.TokenType.LambdaExpression;
 
-    public Expressions Left { get; }
+    public List<Expressions> Variables { get; }
     public Tokens Do { get; }
-    public Expressions Right { get; }
+    public Statement Body { get; }
 
-    public LambdaExpression(Expressions left, Tokens Do, Expressions right)
-    {
-        Left = left;
+    public LambdaExpression( Tokens Do, Statement body, params Expressions[] variables)
+    {   
+        Variables=new List<Expressions>();
+        foreach (var item in variables)
+        {
+           Variables.Add(item); 
+        }
         this.Do = Do;
-        Right = right;
+        Body=body;
     }
 
     public override bool CheckSemantic()

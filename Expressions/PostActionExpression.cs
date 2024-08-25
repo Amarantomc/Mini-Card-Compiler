@@ -5,19 +5,22 @@ public class PostActionExpression : Expressions
 {
     public override Tokens.TokenType Type => Tokens.TokenType.PostActionExpression;
 
-    public Statement PostAction { get; }
     public Expressions Name { get; }
 
-    public PostActionExpression(Statement postAction)
-    {
-        PostAction = postAction;
-        Name=null!;
-    }
+    public SelectorExpression Selector{get; }
 
-    public PostActionExpression(Expressions name, Statement postAction)
+    public List<PostActionExpression> ? PostActions{get;}
+
+     
+    public PostActionExpression(Expressions name, SelectorExpression selector, params PostActionExpression  [] postAction)
     {
         Name = name;
-        PostAction = postAction;
+        Selector = selector;
+        PostActions=new List<PostActionExpression>();
+        foreach (var item in postAction)
+        {
+          PostActions.Add(item);
+        }
     }
 
     public override bool CheckSemantic()

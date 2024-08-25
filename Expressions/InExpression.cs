@@ -5,10 +5,10 @@ public class InExpression : Expressions
 {
     public override Tokens.TokenType Type => Tokens.TokenType.InExpression;
 
-    public Tokens Var { get; }
-    public Tokens Collection { get; }
+    public VarExpression Var { get; }
+    public VarExpression Collection { get; }
 
-    public InExpression(Tokens var, Tokens collection){
+    public InExpression(VarExpression var, VarExpression collection){
         Var = var;
         Collection = collection;
     }

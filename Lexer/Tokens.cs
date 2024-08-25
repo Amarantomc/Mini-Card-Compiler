@@ -148,6 +148,10 @@ public class Tokens{
         StatementExpression,
         EffectExpression,
         DotExpression,
+        HandOfPlayerKeyword,
+        FunctionExpression,
+        String,
+        CardKeyword,
     }
 
     #endregion
@@ -180,8 +184,8 @@ public class Tokens{
            return  TokenType.NameKeyword;
            case "Params" :
            return  TokenType.ParamsKeyword;
-           case "Amount" :
-           return  TokenType.AmountKeyword;
+            case "card":
+            return TokenType.CardKeyword;
            case "Number" :
            return  TokenType.NumberKeyword;
            case "String" :
@@ -206,6 +210,8 @@ public class Tokens{
            return  TokenType.AddKeyword;
            case "DeckOfPlayer" :
            return  TokenType.DeckOfPlayerKeyword;
+           case "HandOfPlayer":
+           return TokenType.HandOfPlayerKeyword;
            case "Push" :
            return  TokenType.PushKeyword;
            case "Remove" :
@@ -252,8 +258,7 @@ public class Tokens{
            return  TokenType.RangedKeyword;
            case "Siege" :
            return  TokenType.SiegeKeyword;
-           case "hand" :
-           return  TokenType.handKeyword;
+            
            case "otherHand" :
            return  TokenType.otherHandKeyword;
            case "deck" :

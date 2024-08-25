@@ -9,11 +9,11 @@ public class CardExpression : Expressions
     public Expressions TypeCard { get; }
     public Expressions Faction { get; }
     public Expressions Power { get; }
-    public Expressions Range { get; }
+    public List<Expressions> Range { get; }
     public OnActivationExpression OnActivation { get; }
     
 
-    public CardExpression( Expressions name, Expressions type, Expressions faction, Expressions power, Expressions range, OnActivationExpression onActivation)
+    public CardExpression( Expressions name, Expressions type, Expressions faction, Expressions power, List<Expressions> range, OnActivationExpression onActivation)
     {
         Name = name;
         TypeCard = type;

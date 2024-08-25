@@ -5,15 +5,12 @@ public class OnActivationExpression : Expressions
 {
     public override Tokens.TokenType Type => Tokens.TokenType.OnActivationExpression;
 
-    public Statement EffectAssignment { get; }
+    public List<Statement> Statements{get;}
+ 
 
-    public OnActivationExpression( params Statement [] effectAssignment )
-    {   
-        EffectAssignment= new Statement();
-        foreach (var item in effectAssignment)
-        {
-            EffectAssignment.Childrens.Enqueue(item);
-        }
+    public OnActivationExpression( List<Statement> statements)
+    {
+        Statements = statements;
     }
 
     public override bool CheckSemantic()

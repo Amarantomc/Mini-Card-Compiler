@@ -6,7 +6,13 @@ public class VarExpression : Expressions
     public override Tokens.TokenType Type => Tokens.TokenType.VarExpression;
 
     public Tokens Var { get; }
+    public Tokens ? DataType{get;}
 
+    public VarExpression(Tokens var, Tokens dataType)
+    {
+        Var = var;
+        DataType = dataType;
+    }
     public VarExpression(Tokens var)
     {
         Var = var;

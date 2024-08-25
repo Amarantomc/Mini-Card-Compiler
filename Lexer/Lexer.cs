@@ -65,6 +65,15 @@ public class Lexer{
                Tokens.TokenType type= Tokens.GetKeyword(result);
                return new Tokens(result,start,type,null!);
                
+            } else if(currentChar=='\"'){
+                 Advanced();
+                 var start=position;
+                while(currentChar!='\"')  Advanced();
+             
+             var length=position-start;
+             var result=text.Substring(start,length);
+             Advanced();
+            return new Tokens(result, start, Tokens.TokenType.String,result );
             }
           
          else  if(currentChar == '+'){
@@ -84,7 +93,7 @@ public class Lexer{
                return new Tokens("-=",position++,Tokens.TokenType.MinusEquals, null!);
              }
               if(currentChar=='-'){
-               return new Tokens("-=",position++,Tokens.TokenType.MinusMinus, null!);
+               return new Tokens("--",position++,Tokens.TokenType.MinusMinus, null!);
              }
             int pos=position-1;
              return new Tokens("-",pos,Tokens.TokenType.Minus, null!);

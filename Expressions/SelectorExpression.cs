@@ -5,12 +5,15 @@ public class SelectorExpression : Expressions
 {
     public override Tokens.TokenType Type =>  Tokens.TokenType.SelectorExpression;
 
-    public Statement SelectorStatement { get; }
+    public AssignmentExpression Source{get;}
+    public AssignmentExpression Single{get;}
+    public LambdaExpression Predicate{get;}
 
-    public SelectorExpression(params Expressions [] expressions)
+    public SelectorExpression(AssignmentExpression source, AssignmentExpression single, LambdaExpression predicate)
     {
-         SelectorStatement=new Statement(expressions);
-         
+        Source = source;
+        Single = single;
+        Predicate = predicate;
     }
 
     public override bool CheckSemantic()
