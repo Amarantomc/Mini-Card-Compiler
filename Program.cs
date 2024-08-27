@@ -7,6 +7,7 @@ internal class Program
     {
        string a= "Context.Hand.Find((x)=>x.Power==5+2+2)";
        string b="i+++3;";
+       string e="true || true && false";
         string input5 = "effect " +
                 "{" +
                 "Name: " + '\"' + "Draw" + '\"' + "," +
@@ -29,9 +30,47 @@ internal class Program
                 "};" +
                 "}" +
                 "}";
+                string input2 = "card " +
+                "{" +
+                "Type: " + '\"' + "O" + '\"' + "@" + '\"' + "ro" + '\"' + "," +
+                "Name: " + '\"' + "Beluga" + '\"' + "," +
+                "Power: " + "-(-1-9)" + "," +
+                "Faction: " + '\"' + "Pokemon" + '\"' + "," +
+                "Range: " + "[" + '\"' + "Ranged" + '\"' + "," + '\"' + "Melee" + '\"' + ",9 + 8 - 4 == 0] ," +
+                "OnActivation: " +
+                "[" +
+                "{" +
+                "Effect:" +
+                "{" +
+                "Name: " + '\"' + "Damage" + '\"' + "," +
+                "amount: 7-2+(-1-9)^(1 - 1 + -1 +1) - 1 ," +
+                "}" +
+                "Selector:" +
+                "{" +
+                "Source: " + '\"' + "board" + '\"' + "," +
+                "Predicate: " + "(unit) => unit.Power == 9 , " +
+                "Single: " + "false || true && !( 5 > 0) " +
+                "}" +
+                "PostAction: " +
+                "{" +
+                "Type: " + '\"' + "O" + '\"' + "@" + '\"' + "ro" + '\"' + "," +
+                "Selector:" +
+                "{" +
+                "Source: " + '\"' + "parent" + '\"' + "," +
+                "Single: !(true || (false && -7 + 9 > 0))," +
+                "Predicate: " + "(unit) => unit.Power == 9" +
+                "}" +
+                "}" +
+                "}," +
+                "{" +
+                "Effect: " + '\"' + "Return Deck" + '\"' +
+                "}" +
+                "]" +
+                "}" +
+                "";
                  
 
-       Parser c= new Parser(input5);
+       Parser c= new Parser(a);
        c.Parse();
     }
 }

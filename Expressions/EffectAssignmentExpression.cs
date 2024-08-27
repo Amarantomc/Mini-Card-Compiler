@@ -8,10 +8,14 @@ public class EffectAssignmentExpression : Expressions
     public AssignmentExpression Name { get; set; }
     public List<AssignmentExpression> Param { get;set; }
 
+    private Scope ? scope{get;set;}
+
     public EffectAssignmentExpression(AssignmentExpression name, List<AssignmentExpression> param)
     {
         Name = name;
-        Param = param;
+        Param=new List<AssignmentExpression>();
+        Copy(Param,param);
+        
     }
 
     public EffectAssignmentExpression(AssignmentExpression name)
@@ -30,11 +34,15 @@ public class EffectAssignmentExpression : Expressions
 
     public override bool CheckSemantic()
     {
-        throw new NotImplementedException();
+         if(Name is null) throw new Exception("Missing Effect Name");
+        if(Name.Right.Evaluate(scope!) is not string) throw new Exception("Invalid Expression, must be String");
+        return true;
     }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
-        throw new NotImplementedException();
+        this.scope=scope;
+        CheckSemantic();
+        return 0;
     }
 }

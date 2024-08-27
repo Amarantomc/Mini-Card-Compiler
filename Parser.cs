@@ -26,7 +26,7 @@ public class Parser{
             if(token.Type!= Tokens.TokenType.WhiteSpace)
             Token.Add(token);
              
-        } 
+        } // faltan propiedades de cartas
           Properties=new List<Tokens.TokenType>{Tokens.TokenType.DeckKeyword, Tokens.TokenType.FieldKeyword,
          Tokens.TokenType.GraveyardKeyword, Tokens.TokenType.HandKeyword, Tokens.TokenType.NameKeyword, Tokens.TokenType.OwnerKeyword
          , Tokens.TokenType.PowerKeyword, Tokens.TokenType.TriggerPlayerKeyword, Tokens.TokenType.TypeKeyword, Tokens.TokenType.BoardKeyword};
@@ -64,14 +64,6 @@ public class Parser{
              case Tokens.TokenType.String:
                 var stringToken=Match(Tokens.TokenType.String);
                 return new LiteralExpression(stringToken,stringToken.Value);
-              
-             case Tokens.TokenType.OpenParen:
-                {
-                    var openParentesis = Match(Tokens.TokenType.OpenParen);
-                    var expresion = ParseGlobalExpresion();
-                    var right = Match(Tokens.TokenType.CloseParen);
-                    return new ParenthesisExpression(openParentesis, expresion, right);
-                }
 
             case Tokens.TokenType.TrueKeyword:
             case Tokens.TokenType.FalseKeyword:
@@ -80,7 +72,17 @@ public class Parser{
                     var value = token.Type == Tokens.TokenType.TrueKeyword;
                     return new LiteralExpression(token, value);
 
+                }   
+              
+             case Tokens.TokenType.OpenParen:
+                {
+                    var openParentesis = Match(Tokens.TokenType.OpenParen);
+                    var expresion = OrExpressions();
+                    var right = Match(Tokens.TokenType.CloseParen);
+                    return new ParenthesisExpression(openParentesis, expresion, right);
                 }
+
+          
             case Tokens.TokenType.OpenKey:
             {
                NextToken();
@@ -93,35 +95,66 @@ public class Parser{
                     continue;
                   }
                   expressions.Add(ParseGlobalExpresion());
-                  //Probar
+                   
                }
                Match(Tokens.TokenType.CloseKey);
                return new Statement(expressions.ToArray());
             } 
-           
-            case Tokens.TokenType.Identifier:
+
+            case Tokens.TokenType.Not:
+            {
+              var op=NextToken();
+              var right=OrExpressions();
+              return new UnaryExpression(op,right);
+            }
+
+            case Tokens.TokenType.Minus:
+            {
+              var op=NextToken();
+              var right=Factor();
+              return new UnaryExpression(op,right);
+            }
+
+            case Tokens.TokenType.Plus:
+            {
+              var op=NextToken();
+              var right=Factor();
+              return new UnaryExpression(op,right);
+            }
+
+             case Tokens.TokenType.Identifier:
              var id=new VarExpression(NextToken());
+              
              while (CurrentToken.Type== Tokens.TokenType.Dot)
              {
                var op=NextToken();
                var right=Factor();
+                
                return new DotExpression(id,op,right);
              }
              return id;
 
              case Tokens.TokenType.PopKeyword:
-             {
+             { 
+               NextToken();
+               Match(Tokens.TokenType.OpenParen);
+               Match(Tokens.TokenType.CloseParen);
                return new FunctionExpression(Tokens.TokenType.PopKeyword);
              }
+             
              case Tokens.TokenType.ShuffleKeyword:
              {
+               NextToken();
+               Match(Tokens.TokenType.OpenParen);
+               Match(Tokens.TokenType.CloseParen);
               return new FunctionExpression(Tokens.TokenType.ShuffleKeyword);
              }
+            
              case Tokens.TokenType.FindKeyword:
              {
                var type=NextToken().Type;
                Match(Tokens.TokenType.OpenParen);
-               var body=LambdaExpressions();
+               var body=LambdaExpressions( Tokens.TokenType.PredicateKeyword);
                Match(Tokens.TokenType.CloseParen);
                return new FunctionExpression(type,body);
              }
@@ -133,7 +166,7 @@ public class Parser{
                        if(CurrentToken.Type== Tokens.TokenType.OpenBracket )
                        {  
                           NextToken();
-                          var body=ParseExpresion();
+                          var body=OrExpressions();
                           Match( Tokens.TokenType.CloseBracket);
                           return new FunctionExpression(type,body);
                        }
@@ -168,55 +201,55 @@ public class Parser{
         
        
     } 
-     private Expressions ParseExpresion(int parentPrecedence=0){
-          Expressions left;
-          bool isId=false;
-          VarExpression id=null!;
-          if(CurrentToken.Type== Tokens.TokenType.Identifier)
-          {  
-             id= (VarExpression)Factor();
+    //  private Expressions ParseExpresion(int parentPrecedence=0){
+    //       Expressions left;
+    //       bool isId=false;
+    //       Expressions id=null!;
+    //       if(CurrentToken.Type== Tokens.TokenType.Identifier)
+    //       {  
+    //          id=Factor();
               
-             isId=true;
-          }
-          var unaryPrecedence= UnaryOpPrecedence(CurrentToken.Type);
-          if(unaryPrecedence!=0 && unaryPrecedence>=parentPrecedence)
-          {
-             var op=NextToken();
-              if(isId  &&( op.Type== Tokens.TokenType.PlusPlus || op.Type== Tokens.TokenType.MinusMinus))
-              {
-                 left=new UnaryExpression(op,id);
-              } else {
-                var operand=ParseExpresion(unaryPrecedence);
-                left=new UnaryExpression(op,operand);
-              }
+    //          isId=true;
+    //       }
+    //       var unaryPrecedence= UnaryOpPrecedence(CurrentToken.Type);
+    //       if(unaryPrecedence!=0 && unaryPrecedence>=parentPrecedence)
+    //       {
+    //          var op=NextToken();
+    //           if(isId  &&( op.Type== Tokens.TokenType.PlusPlus || op.Type== Tokens.TokenType.MinusMinus))
+    //           {
+    //              left=new UnaryExpression(op,id);
+    //           } else {
+    //             var operand=ParseExpresion(unaryPrecedence);
+    //             left=new UnaryExpression(op,operand);
+    //           }
              
-          } else 
-          left= Factor();
-        while( true){
-          var precedence =OpPrecedence(CurrentToken.Type);
-          if(precedence==0|| precedence<=parentPrecedence) break;
-          var operatorToken= NextToken();
-          if( operatorToken.Type== Tokens.TokenType.Dot){
-             var body=ParseGlobalExpresion();
-             left=new DotExpression(left,operatorToken,body);
+    //       } else 
+    //       left= Factor();
+    //     while( true){
+    //       var precedence =OpPrecedence(CurrentToken.Type);
+    //       if(precedence==0|| precedence<=parentPrecedence) break;
+    //       var operatorToken= NextToken();
+    //       if( operatorToken.Type== Tokens.TokenType.Dot){
+    //          var body=ParseGlobalExpresion();
+    //          left=new DotExpression(left,operatorToken,body);
               
-          }
-           else if( operatorToken.Type== Tokens.TokenType.Assignment || operatorToken.Type== Tokens.TokenType.PlusEquals || 
-                operatorToken.Type== Tokens.TokenType.MinusEquals || operatorToken.Type== Tokens.TokenType.MullEquals || operatorToken.Type== Tokens.TokenType.DivEquals)
-               { 
-                 var right= ParseGlobalExpresion();
-                 left=new AssignmentExpression(left,operatorToken,right);
-               }
-          else {
-              var right= ParseExpresion(precedence);
-              left= new BinaryExpression(left, operatorToken, right);
+    //       }
+    //        else if( operatorToken.Type== Tokens.TokenType.Assignment || operatorToken.Type== Tokens.TokenType.PlusEquals || 
+    //             operatorToken.Type== Tokens.TokenType.MinusEquals || operatorToken.Type== Tokens.TokenType.MullEquals || operatorToken.Type== Tokens.TokenType.DivEquals)
+    //            { 
+    //              var right= ParseGlobalExpresion();
+    //              left=new AssignmentExpression(left,operatorToken,right);
+    //            }
+    //       else {
+    //           var right= ParseExpresion(precedence);
+    //           left= new BinaryExpression(left, operatorToken, right);
               
-          } 
+    //       } 
 
-        } 
+    //     } 
          
-         return left;
-     }  
+    //      return left;
+    //  }  
      
       private static int OpPrecedence(Tokens.TokenType op){
        switch(op){
@@ -305,7 +338,7 @@ public class Parser{
            
         
         
-        return ParseExpresion();
+        return OrExpressions();
        }
      public SyntaxTree Parse(){
         
@@ -377,7 +410,7 @@ public class Parser{
               name=new AssignmentExpression(nameExpression,op, ParseGlobalExpresion());
            }
            if ( CurrentToken.Type== Tokens.TokenType.ParamsKeyword && effectParams is null)
-           {
+           {  // si no es : es , sin tipo
               NextToken();
               Match(Tokens.TokenType.TwoDots);
               Match(Tokens.TokenType.OpenKey);
@@ -395,7 +428,11 @@ public class Parser{
                     NextToken();
                   } else Error.ErrorList.Add(new Error(Error.ErrorType.Semantic, CurrentToken.Position,"Invalid Type "+CurrentToken.Text));
 
-                }else Error.ErrorList.Add(new Error(Error.ErrorType.Syntax, CurrentToken.Position,"Missing :"));
+                }else if(CurrentToken.Type== Tokens.TokenType.Coma)
+                 {
+                   paramsExpression.Add(new VarExpression(variable));
+                   NextToken();
+                 }
                  
                  if(CurrentToken.Type== Tokens.TokenType.Coma) NextToken();
                  else if( CurrentToken.Type== Tokens.TokenType.CloseKey) continue;
@@ -410,7 +447,7 @@ public class Parser{
             {
               NextToken();
               Match(Tokens.TokenType.TwoDots);
-              action=new ActionExpression(LambdaExpressions());
+              action=new ActionExpression(LambdaExpressions( Tokens.TokenType.ActionKeyword));
             }
 
             if(CurrentToken.Type== Tokens.TokenType.Coma &&(LookAhead(1).Type== Tokens.TokenType.NameKeyword||LookAhead(1).Type== Tokens.TokenType.ParamsKeyword ||LookAhead(1).Type== Tokens.TokenType.ActionKeyword))
@@ -429,7 +466,7 @@ public class Parser{
        
     }
 
-     private LambdaExpression LambdaExpressions()
+     private LambdaExpression LambdaExpressions(Tokens.TokenType type)
      {
          List<Expressions> variables=new List<Expressions>();
          List<Expressions> body=new List<Expressions>();
@@ -466,12 +503,16 @@ public class Parser{
          } else
          {
            Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Missing Parenthesis"));
-           return null!;
+           NextToken();
+            
          }
 
           var op=Match(Tokens.TokenType.Do);
           // Hacer comprobacion con Action
-          if(CurrentToken.Type== Tokens.TokenType.OpenKey)
+          if(type== Tokens.TokenType.ActionKeyword)
+          {
+
+            if(CurrentToken.Type== Tokens.TokenType.OpenKey)
           {
              NextToken();
              while (CurrentToken.Type!= Tokens.TokenType.CloseKey)
@@ -482,10 +523,16 @@ public class Parser{
              }
 
               
-          } 
+          } else 
+           {
+              Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Missing Key"));
+              NextToken();
+               
+           }
+          }
           else 
           {
-             body.Add(ParseExpresion());
+             body.Add(OrExpressions());
           }
             return new LambdaExpression(op,new Statement(body.ToArray()),variables.ToArray());
             
@@ -505,48 +552,61 @@ public class Parser{
         while (CurrentToken.Type!= Tokens.TokenType.CloseKey)
         {
             if(CurrentToken.Type== Tokens.TokenType.TypeKeyword ||CurrentToken.Type== Tokens.TokenType.NameKeyword ||CurrentToken.Type== Tokens.TokenType.FactionKeyword || CurrentToken.Type== Tokens.TokenType.PowerKeyword)
-            {
+            {  var Keyword=CurrentToken;
                var id=new VarExpression(CurrentToken);
                NextToken();
                var op=Match( Tokens.TokenType.TwoDots);
-               var right= ParseExpresion();
-               if(id.Type== Tokens.TokenType.TypeKeyword) type=new AssignmentExpression(id,op,right);
-              else if(id.Type== Tokens.TokenType.NameKeyword) name=new AssignmentExpression(id,op,right);
-              else if(id.Type== Tokens.TokenType.FactionKeyword) faction=new AssignmentExpression(id,op,right);
-              else if(id.Type== Tokens.TokenType.PowerKeyword) power=new AssignmentExpression(id,op,right);
+               var right= OrExpressions();
+               Match(Tokens.TokenType.Coma);
+               if(Keyword.Type== Tokens.TokenType.TypeKeyword && type is null) type=new AssignmentExpression(id,op,right);
+              else if(Keyword.Type== Tokens.TokenType.NameKeyword && name is null ) name=new AssignmentExpression(id,op,right);
+              else if(Keyword.Type== Tokens.TokenType.FactionKeyword && faction is null) faction=new AssignmentExpression(id,op,right);
+              else if(Keyword.Type== Tokens.TokenType.PowerKeyword && power is null) power=new AssignmentExpression(id,op,right);
+              else{
+                 Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Only can have one "+CurrentToken.Text));
+                break;
+              }
            }
 
-           if(CurrentToken.Type== Tokens.TokenType.RangeKeyword && !range.Any())
-           {
+           else if(CurrentToken.Type== Tokens.TokenType.RangeKeyword)
+           { 
+              if(range.Any()){
+                Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Only can have one "+CurrentToken.Text));
+                break;
+              }
              NextToken();
              Match(Tokens.TokenType.TwoDots);
              Match(Tokens.TokenType.OpenBracket);
             
              while (CurrentToken.Type!= Tokens.TokenType.CloseBracket )
-             {
-                 range.Add(ParseExpresion());
-                 if(CurrentToken.Type== Tokens.TokenType.TwoDots) NextToken();
+             {   
+                 range.Add(OrExpressions());
+                  if(CurrentToken.Type== Tokens.TokenType.Coma) NextToken();
                  else if(CurrentToken.Type== Tokens.TokenType.CloseBracket) continue;
                  else{
                      Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Expected ,"));
                      break;
-                 }
+                 } 
              }
-              Match(Tokens.TokenType.CloseBracket);
+              NextToken();
+              Match(Tokens.TokenType.Coma);
 
            } 
-            if(CurrentToken.Type== Tokens.TokenType.OnActivationKeyword && onActivation is null)
-            {
+           else if(CurrentToken.Type== Tokens.TokenType.OnActivationKeyword)
+            {   
+                if(onActivation is not null){
+                  Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Only can have one "+CurrentToken.Text));
+                break;
+                }
                 NextToken();
                 onActivation=OnActivationExpressions();
+                Match(Tokens.TokenType.CloseBracket);
+            }else{
+               Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Unexpected token "+CurrentToken.Text));
+                     break;
             }
              
-             if(CurrentToken.Type== Tokens.TokenType.Coma) NextToken();
-             else if(CurrentToken.Type == Tokens.TokenType.CloseKey) continue;
-             else{
-                    Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Expected ,"));
-                     break;
-             }
+             
         }
          return new CardExpression(name,type,faction,power,range,onActivation);
     }
@@ -564,7 +624,7 @@ public class Parser{
          
          
          while(CurrentToken.Type!= Tokens.TokenType.CloseBracket)
-         {    // no es obligado q despues de bracket haya key
+         {     
             if(CurrentToken.Type== Tokens.TokenType.OpenKey)
             {  
               NextToken();
@@ -583,10 +643,15 @@ public class Parser{
                 {
                   postAction=PostActionExpressions();
                 } 
-                else if(CurrentToken.Type== Tokens.TokenType.EffectCardKeyword && effect.Name is null)
+                else if(CurrentToken.Type== Tokens.TokenType.EffectCardKeyword)
               { 
                  
                 NextToken();
+                 if(effect.Name is not null)
+                 { 
+                    Error.ErrorList.Add(new Error(Error.ErrorType.Semantic,CurrentToken.Position-1,"Cannot have many Effect's Name in the same block"));
+                    break;
+                 }
                 Match(Tokens.TokenType.TwoDots);
                  
                 if(CurrentToken.Type== Tokens.TokenType.OpenKey)
@@ -594,40 +659,39 @@ public class Parser{
 
                 while (CurrentToken.Type!= Tokens.TokenType.CloseKey)
                 { 
+                  NextToken();
                   if(CurrentToken.Type== Tokens.TokenType.NameKeyword && effect.Name is null)
                   {
                      effect.Name=AssignmentExpressions();
-                  } else if( CurrentToken.Type== Tokens.TokenType.Identifier)
-                  {
+                  }  if( CurrentToken.Type== Tokens.TokenType.Identifier)
+                  {  
                      effect.Param.Add(AssignmentExpressions());
+                     if(CurrentToken.Type== Tokens.TokenType.CloseKey) continue;
+                    
                   if(LookAhead(1).Type!= Tokens.TokenType.Identifier)
                   {
                     Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Missing  }"));
                     NextToken();
                     break;
                   }
-                  } else{
-                    Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Name already exist"));
-                    NextToken();
-                    break;
-                  }
+                  } 
                   
                    
                 }
                 NextToken();
                }  
-                else if(LookAhead(1).Type== Tokens.TokenType.String)
+                else if(CurrentToken.Type== Tokens.TokenType.String)
               {  
                  
                 var id=new Tokens("Name",CurrentToken.Position, Tokens.TokenType.NameKeyword,"Name");
                 var idExpression=new VarExpression(id);
                 var op=LookAhead(-1);
-                 effect.Name=new AssignmentExpression(idExpression,op,ParseExpresion());
+                 effect.Name=new AssignmentExpression(idExpression,op,OrExpressions());
                 NextToken();
             } 
              } else
              {
-               Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Missing { "));
+               Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Invalid Token "));
                NextToken();
                break;
              } 
@@ -676,26 +740,27 @@ public class Parser{
        LambdaExpression predicate=null!;
 
         while (CurrentToken.Type!= Tokens.TokenType.CloseKey)
-        {
+        {   // NO ES OBLIGATORIO SINGLE NI PREDICATE
             if(CurrentToken.Type== Tokens.TokenType.SourceKeyword && source is null)
             {
                var name=new VarExpression(CurrentToken);
                NextToken();
                var op=Match(Tokens.TokenType.TwoDots);
-               source=new AssignmentExpression(name,op,ParseExpresion());
+               source=new AssignmentExpression(name,op,OrExpressions());
+               Match( Tokens.TokenType.Coma);
             }
            else if(CurrentToken.Type== Tokens.TokenType.SingleKeyword && single is null)
             {
                 var name=new VarExpression(CurrentToken);
                 NextToken();
                 var op=Match(Tokens.TokenType.TwoDots);
-                single=new AssignmentExpression(name,op,ParseExpresion());
+                single=new AssignmentExpression(name,op,OrExpressions());
             }
             else if(CurrentToken.Type== Tokens.TokenType.PredicateKeyword && predicate is null)
             {
                NextToken();
                Match(Tokens.TokenType.TwoDots);
-               predicate=LambdaExpressions();
+               predicate=LambdaExpressions( Tokens.TokenType.PredicateKeyword);
             } else
              {
                Error.ErrorList.Add(new Error(Error.ErrorType.Semantic,CurrentToken.Position,"Unexpected token "+ CurrentToken.Text));
@@ -703,13 +768,7 @@ public class Parser{
                return null!;
             }
 
-            if( CurrentToken.Type== Tokens.TokenType.Coma) NextToken();
-            else if(CurrentToken.Type== Tokens.TokenType.CloseKey) continue;
-            else{
-              Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Missing ,"));
-               NextToken();
-               return null!;
-            }
+            
         }
          Match(Tokens.TokenType.CloseKey);
          return new SelectorExpression(source,single,predicate);
@@ -732,7 +791,7 @@ public class Parser{
                var name=new VarExpression(CurrentToken);
                NextToken();
                var op=Match(Tokens.TokenType.TwoDots);
-               type=new AssignmentExpression(name,op,ParseExpresion());
+               type=new AssignmentExpression(name,op,OrExpressions());
             }
             else if(CurrentToken.Type== Tokens.TokenType.SelectorKeyword &&  selector is null)
             {
@@ -771,13 +830,13 @@ public class Parser{
         if(op.Type== Tokens.TokenType.Assignment|| op.Type== Tokens.TokenType.PlusEquals ||op.Type== Tokens.TokenType.MinusEquals ||op.Type== Tokens.TokenType.MullEquals ||op.Type== Tokens.TokenType.DivEquals)
         {
            NextToken();
-           assignment=new AssignmentExpression(id,op,ParseExpresion());
+           assignment=new AssignmentExpression(id,op,OrExpressions());
            Match(Tokens.TokenType.EOF);
         }
         else if(op.Type== Tokens.TokenType.TwoDots)
         {
           NextToken();
-          assignment=new AssignmentExpression(id,op,ParseExpresion());
+          assignment=new AssignmentExpression(id,op,OrExpressions());
           Match(Tokens.TokenType.Coma);
           
         } 
@@ -785,5 +844,122 @@ public class Parser{
         
       
 
+    }
+
+    private Expressions OrExpressions()
+    {
+       var left=AndExpressions();
+      while(CurrentToken.Type== Tokens.TokenType.Or)
+      {
+        var op=NextToken();
+        var right=OrExpressions();
+        left=new BinaryExpression(left,op,right);
+
+      }
+      return left;
+
+
+    }
+
+    private Expressions AndExpressions()
+    {
+         var left=CompareExpressions();
+      while(CurrentToken.Type== Tokens.TokenType.And)
+      {
+        var op=NextToken();
+        var right=OrExpressions();
+        left=new BinaryExpression(left,op,right);
+
+      }
+      return left;
+    }
+
+    private Expressions CompareExpressions()
+    {
+         Expressions left=ConcatExpressions();
+          while(CurrentToken.Type== Tokens.TokenType.Greater|| CurrentToken.Type== Tokens.TokenType.GreaterEquals||
+                CurrentToken.Type== Tokens.TokenType.Less|| CurrentToken.Type== Tokens.TokenType.LessEquals
+                || CurrentToken.Type== Tokens.TokenType.EqualsEquals)
+      {
+        var op=NextToken();
+        var right=ConcatExpressions();
+        left=new BinaryExpression(left,op,right);
+
+      }
+      return left;
+    }
+
+    private Expressions ConcatExpressions()
+    {
+         Expressions left=ArithmeticExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Concat || CurrentToken.Type== Tokens.TokenType.TwoConcats)
+         {
+           var op=NextToken();
+           var right=ArithmeticExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions ArithmeticExpressions()
+    {
+         Expressions left=ArithmeticMulOrDivExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Plus || CurrentToken.Type== Tokens.TokenType.Minus)
+         {
+           var op=NextToken();
+           var right=ArithmeticMulOrDivExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions ArithmeticMulOrDivExpressions()
+    {
+          Expressions left=PowExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Mull || CurrentToken.Type== Tokens.TokenType.Div)
+         {
+           var op=NextToken();
+           var right=PowExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions PowExpressions()
+    {
+          Expressions left=IncrementExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Pow)
+         {
+           var op= NextToken();
+           var right=IncrementExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions IncrementExpressions()
+    {
+         Expressions left=DotExpressions();
+         if(CurrentToken.Type== Tokens.TokenType.PlusPlus|| CurrentToken.Type== Tokens.TokenType.MinusMinus)
+         {
+           var op=NextToken();
+            
+           left=new UnaryExpression(op,left);
+         }
+         return left;
+    }
+
+    private Expressions DotExpressions()
+    {
+       Expressions left=Factor();
+         while (CurrentToken.Type== Tokens.TokenType.Dot)
+         {
+           var op= NextToken();
+           var right=Factor();
+
+            
+           left=new DotExpression(left,op,right);
+         }
+         return left;  
     }
 }

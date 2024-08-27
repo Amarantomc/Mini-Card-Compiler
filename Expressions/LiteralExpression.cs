@@ -18,7 +18,7 @@
 
     public override Tokens.TokenType Type => Tokens.TokenType.LiteralExpression;
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
          return Value;
     }

@@ -28,7 +28,7 @@ public class PostActionExpression : Expressions
         throw new NotImplementedException();
     }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
         throw new NotImplementedException();
     }

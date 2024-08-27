@@ -63,7 +63,7 @@ public class Lexer{
                   Advanced();
                }
                Tokens.TokenType type= Tokens.GetKeyword(result);
-               return new Tokens(result,start,type,null!);
+               return new Tokens(result,start,type,result);
                
             } else if(currentChar=='\"'){
                  Advanced();

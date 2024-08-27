@@ -152,6 +152,7 @@ public class Tokens{
         FunctionExpression,
         String,
         CardKeyword,
+        EffectCardKeyword,
     }
 
     #endregion
@@ -180,6 +181,8 @@ public class Tokens{
            return  TokenType.ForKeyword;
            case "effect" :
            return  TokenType.EffectKeyword;
+           case "Effect":
+           return TokenType.EffectCardKeyword;
            case "Name" :
            return  TokenType.NameKeyword;
            case "Params" :
