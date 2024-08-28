@@ -1,4 +1,5 @@
 ﻿using GWent;
+ 
 
 internal class Program
 { 
@@ -69,8 +70,8 @@ internal class Program
                 "}" +
                 "";
                  
-
-       Parser c= new Parser(a);
+       
+       Parser c= new Parser(input1);
        c.Parse();
     }
 }

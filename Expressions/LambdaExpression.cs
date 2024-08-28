@@ -29,7 +29,7 @@ public class LambdaExpression : Expressions
     {
         throw new NotImplementedException();
     }
-    public bool PredicateCheckSemantic(Scope internalScope)
+    public bool DelegateCheckSemantic(Scope internalScope)
     {
          foreach (var item in Variables)
          {
@@ -53,7 +53,28 @@ public class LambdaExpression : Expressions
     }
 
     public override object Evaluate(Scope scope)
-    {
-        throw new NotImplementedException();
+    {    // Devuelve un Action o un Predicate
+         if(Delegate == Tokens.TokenType.ActionExpression)
+         {
+            foreach (var item in Variables )
+            {
+                scope.Variables.Add(item);
+            }
+
+            Action action=()=> Body.Evaluate(scope);
+            return action;
+         }
+         if(Delegate == Tokens.TokenType.PredicateKeyword)
+         {  
+            VarExpression expression;
+            foreach (var item in Variables)
+            {
+                scope.Variables.Add(item);
+                expression=item;
+            }
+            Predicate<VarExpression> predicate=(expression) => (bool)Body.Expressions.First().Evaluate(scope);
+            return predicate;
+         }
+         throw new Exception("Invalid Operation");
     }
 }

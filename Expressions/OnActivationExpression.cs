@@ -6,7 +6,7 @@ public class OnActivationExpression : Expressions
     public override Tokens.TokenType Type => Tokens.TokenType.OnActivationExpression;
 
     public List<Statement> Statements{get;}
-    private Scope ? scope{get;set;}
+     
  
 
     public OnActivationExpression( List<Statement> statements)
@@ -17,22 +17,41 @@ public class OnActivationExpression : Expressions
 
     public override bool CheckSemantic()
     {
-           foreach (var item in Statements)
-         {
-            foreach (var statement in item.Expressions)
-            {
-                statement.Evaluate(scope!);
-            }
-         }
+        
          
         return true;
-    } 
+    }
+    public bool CheckSemantic(Scope scope)
+    {
+          foreach (var item in Statements)
+         {
+            foreach (var statement in item.Expressions)
+            {  
+                if(statement is EffectAssignmentExpression || statement is SelectorExpression || statement is PostActionExpression)
+                {
+                     if(statement is EffectAssignmentExpression effectExpression)  effectExpression.CheckSemantic(scope!);
+                    if(statement is SelectorExpression selector)  selector.CheckSemantic(scope!);
+                    if(statement is PostActionExpression postActionExpression)  postActionExpression.CheckSemantic(scope!);
+                }
+                else throw new Exception("Invalid Expression inside OnActivation");
+               
+            }
+         }
+        return true;
+    }
  
 
     public override object Evaluate(Scope scope)
     {
-       this.scope=scope;
-       CheckSemantic();
+       List<(EffectExpression,SelectorExpression)> result= new List<(EffectExpression, SelectorExpression)>();
+       foreach (var item in Statements)
+       {
+         foreach (var statement in item.Expressions)
+         {
+            
+         }
+       }
+        
        
         throw new NotImplementedException();
     }

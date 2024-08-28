@@ -6,15 +6,21 @@ public class VarExpression : Expressions
     public override Tokens.TokenType Type => Tokens.TokenType.VarExpression;
 
     public Tokens Var { get; }
-    public Tokens ? DataType{get;}
+    public Tokens.TokenType ? DataType{get;}
 
     public object? Value{get;set;}
 
-    public VarExpression(Tokens var, Tokens dataType)
+    public VarExpression(Tokens var, Tokens.TokenType dataType,object value)
     {
         Var = var;
         DataType = dataType;
-        Value=var.Value;
+        Value=value;
+    }
+
+    public VarExpression(Tokens var,Tokens.TokenType dataType)
+    {
+        Var = var;
+        DataType = dataType;
     }
     public VarExpression(Tokens var)
     {
@@ -23,8 +29,8 @@ public class VarExpression : Expressions
     }
 
     public override bool CheckSemantic()
-    {
-        throw new NotImplementedException();
+    {    //DUDA
+         return true;
     }
 
     public override object Evaluate(Scope scope)

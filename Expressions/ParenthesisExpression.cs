@@ -18,11 +18,11 @@ public class ParenthesisExpression : Expressions
 
     public override bool CheckSemantic()
     {
-        throw new NotImplementedException();
+         return Expression.CheckSemantic();
     }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
-        throw new NotImplementedException();
+         return Expression.Evaluate(scope!);
     }
 }

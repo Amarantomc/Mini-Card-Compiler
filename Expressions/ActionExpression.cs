@@ -16,9 +16,13 @@ public class ActionExpression : Expressions
     {
         throw new NotImplementedException();
     }
-
-    public override object Evaluate()
+    public bool ActionCheckSemantic(Scope scope)
     {
-        throw new NotImplementedException();
+        return LambdaExpression.DelegateCheckSemantic(scope);
+    }
+
+    public override object Evaluate(Scope scope)
+    {
+         return LambdaExpression.Evaluate(scope!);
     }
 }

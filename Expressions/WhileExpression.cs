@@ -9,6 +9,8 @@ public class WhileExpression : Expressions
     
     public Statement Body { get; }
 
+    
+
     public WhileExpression( Expressions boolExpression,Statement body)
     {
          
@@ -21,11 +23,23 @@ public class WhileExpression : Expressions
 
     public override bool CheckSemantic()
     {
-        throw new NotImplementedException();
+          return true;
+       
     }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
-        throw new NotImplementedException();
+         Scope scopeStatment=scope.CreateChild();
+         if(BoolExpression.Evaluate(scope) is bool condition)
+         {
+             while (condition)
+             {
+                Body.Evaluate(scopeStatment);
+             }
+         } else {
+            throw new Exception("Missing or Invalid Expression for While Condition");
+         }
+         return null!;
+         
     }
 }

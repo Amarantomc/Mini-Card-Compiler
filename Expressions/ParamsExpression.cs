@@ -14,11 +14,16 @@ public class ParamsExpression : Expressions
 
     public override bool CheckSemantic()
     {
-        throw new NotImplementedException();
+         if(ParamsStatement.Expressions.All(x=>x is VarExpression)) return true;
+         throw new Exception("Invalid Expressions on Params Statement");
     }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
-        throw new NotImplementedException();
+         foreach (var item in ParamsStatement.Expressions)
+         {
+            item.Evaluate(scope);
+         }
+         return null!;
     }
 }

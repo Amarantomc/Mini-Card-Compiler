@@ -5,7 +5,7 @@ public class SelectorExpression : Expressions
 {
     public override Tokens.TokenType Type =>  Tokens.TokenType.SelectorExpression;
 
-    public AssignmentExpression Source{get;}
+    public AssignmentExpression Source{get;set;}
     public AssignmentExpression? Single{get;}
     public LambdaExpression ?Predicate{get;}
 
@@ -28,7 +28,7 @@ public class SelectorExpression : Expressions
            {
               if(Predicate is not null)
               {
-                 return true && Predicate.CheckSemantic();
+                 return true && Predicate.DelegateCheckSemantic(scope!);
               }
               return true;
            }
@@ -37,10 +37,27 @@ public class SelectorExpression : Expressions
         throw new Exception("Missing Source");
     }
 
-    public override object Evaluate(Scope scope)
+    public bool CheckSemantic(Scope scope)
     {
-         this.scope=scope;
-         CheckSemantic();
+        if(Source is not null)
+        {
+           if(Source.Right.Evaluate(scope!) is string exp && source.Contains(exp))
+           {
+              if(Predicate is not null)
+              {
+                 return true && Predicate.DelegateCheckSemantic(scope!);
+              }
+              return true;
+           }
+           throw new Exception("Invalid expression for Source");
+        }
+        throw new Exception("Missing Source");  
+    }
+
+    public override object Evaluate(Scope scope)
+    {    //No completado
+         var soucre=Source.Evaluate(scope);
+         bool single=(Single is null)? false: (bool)Single.Right.Evaluate(scope!);
          return 0;
     }
 }

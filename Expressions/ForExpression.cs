@@ -4,21 +4,34 @@ public class ForExpression : Expressions
 {
     public override Tokens.TokenType Type => Tokens.TokenType.ForExpression;
 
-    public Expressions Condition { get; }
+    public InExpression Condition { get; }
     public Statement Expressions { get; }
 
-    public ForExpression(Expressions condition, Statement expressions){
+    public ForExpression(InExpression condition, Statement expressions){
         Condition = condition;
         Expressions = expressions;
     }
     
     public override bool CheckSemantic()
     {
-        throw new NotImplementedException();
+         return Condition.CheckSemantic() && Expressions.CheckSemantic();
     }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
-        throw new NotImplementedException();
+         Scope statmentScope=scope.CreateChild();
+         int i=0;
+         if(Condition!.Evaluate(scope)is not bool condition) throw new Exception("Invalid or Missing Expression");
+          
+        while ( Condition!.Evaluate(scope,i)is bool exp && exp)
+            {
+               i++;
+               Expressions.Evaluate(statmentScope); 
+            
+         }  
+
+         
+         return true;
+
     }
 }

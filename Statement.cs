@@ -3,6 +3,8 @@
        public Queue<Expressions> Expressions{get;set;}
        public Queue<Statement> Childrens{get;set;}
 
+       
+
     public override Tokens.TokenType Type =>  Tokens.TokenType.StatementExpression;
 
     public Statement( ) {
@@ -20,13 +22,35 @@
          }
       }
 
-    public override object Evaluate()
+    public override object Evaluate(Scope scope)
     {
-        throw new NotImplementedException();
+       foreach (var item in Expressions)
+       {
+          item.Evaluate(scope);
+       } 
+       return null!; 
     }
 
     public override bool CheckSemantic()
     {
-        throw new NotImplementedException();
+         foreach (var item in Expressions)
+         {
+            if(item is WhileExpression || item is ForExpression|| item is UnaryExpression || item is AssignmentExpression|| item is DotExpression)
+            {
+              if(item is UnaryExpression unary)
+              {
+                 if(unary.Op.Type!= Tokens.TokenType.PlusPlus || unary.Op.Type!= Tokens.TokenType.MinusMinus)
+                 {
+                    throw new Exception("Invalid Expression in Statment");
+                 }
+                 continue;
+              }
+              continue;
+              
+            }
+            throw new Exception("Invalid Expression in Statment");
+         }
+         return true;
+         
     }
 }

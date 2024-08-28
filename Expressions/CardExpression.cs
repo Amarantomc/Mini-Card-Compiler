@@ -1,5 +1,6 @@
 
 using GWent;
+using Logic;
 using Microsoft.Win32.SafeHandles;
 
 public class CardExpression : Expressions
@@ -27,6 +28,7 @@ public class CardExpression : Expressions
         OnActivation = onActivation;
         Range=new List<Expressions>();
         Copy(Range,range);
+        
     }
 
     public override bool CheckSemantic()
@@ -58,7 +60,7 @@ public class CardExpression : Expressions
 
             }
         } 
-          OnActivation.Evaluate(scope!);
+          OnActivation.CheckSemantic(scope!);
           return true;
 
           
@@ -102,6 +104,20 @@ public class CardExpression : Expressions
 
     public override object Evaluate(Scope scope)
     {
-         return 0;
+         this.scope=scope;
+         CheckSemantic();
+         var name=Name.Evaluate(scope);
+         var type=TypeCard.Evaluate(scope);
+         var faction=Faction.Evaluate(scope);
+         var power= Power.Evaluate(scope);
+         var range=RangeMethod(Range);
+          
+         List<(EffectExpression,SelectorExpression)> result=new List<(EffectExpression, SelectorExpression)>();
+         OnActivation.Evaluate(scope);
+            
+               return 0;
+         
+
+          
     }
 }
