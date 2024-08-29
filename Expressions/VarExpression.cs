@@ -25,7 +25,7 @@ public class VarExpression : Expressions
     public VarExpression(Tokens var)
     {
         Var = var;
-        Value=var.Value;
+         
     }
 
     public override bool CheckSemantic()

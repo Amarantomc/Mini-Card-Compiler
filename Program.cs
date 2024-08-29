@@ -1,5 +1,6 @@
 ﻿using GWent;
- 
+using Logic;
+
 
 internal class Program
 { 
@@ -37,7 +38,7 @@ internal class Program
                 "Name: " + '\"' + "Beluga" + '\"' + "," +
                 "Power: " + "-(-1-9)" + "," +
                 "Faction: " + '\"' + "Pokemon" + '\"' + "," +
-                "Range: " + "[" + '\"' + "Ranged" + '\"' + "," + '\"' + "Melee" + '\"' + ",9 + 8 - 4 == 0] ," +
+                "Range: " + "[" + '\"' + "Melee"  + '\"' + "," + '\"' + "Ranged" + '\"' + ", "+'\"' + "Siege" + '\"'+"] ," +
                 "OnActivation: " +
                 "[" +
                 "{" +
@@ -54,7 +55,7 @@ internal class Program
                 "}" +
                 "PostAction: " +
                 "{" +
-                "Type: " + '\"' + "O" + '\"' + "@" + '\"' + "ro" + '\"' + "," +
+                "Type: " + '\"' + "Draw"+ '\"' + "," +
                 "Selector:" +
                 "{" +
                 "Source: " + '\"' + "parent" + '\"' + "," +
@@ -64,14 +65,16 @@ internal class Program
                 "}" +
                 "}," +
                 "{" +
-                "Effect: " + '\"' + "Return Deck" + '\"' +
+                "Effect: " + '\"' + "Draw" + '\"' +
                 "}" +
                 "]" +
                 "}" +
                 "";
                  
+         
+         var tree=SyntaxTree.Parse(input5+input1+input2);
+          List<Card> f= tree.Visitor();
+        
        
-       Parser c= new Parser(input1);
-       c.Parse();
     }
 }

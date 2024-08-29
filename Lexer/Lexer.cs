@@ -37,7 +37,11 @@ public class Lexer{
    
    public Tokens GetTokens()
       {  
-          if(char.IsWhiteSpace(currentChar)){
+          if(currentChar=='\0')
+          {
+              return new Tokens("\0",position, Tokens.TokenType.End,null!);
+          }
+          else if(char.IsWhiteSpace(currentChar)){
              var start=position;
              while(char.IsWhiteSpace(currentChar))  Advanced();
              

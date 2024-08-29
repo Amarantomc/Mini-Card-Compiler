@@ -153,6 +153,7 @@ public class Tokens{
         String,
         CardKeyword,
         EffectCardKeyword,
+        End,
     }
 
     #endregion

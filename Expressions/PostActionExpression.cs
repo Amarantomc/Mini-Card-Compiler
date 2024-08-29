@@ -67,9 +67,9 @@ public class PostActionExpression : Expressions
 
     private List<(EffectExpression,SelectorExpression)> GetEffect(PostActionExpression postActionExpression, SelectorExpression parent, List<(EffectExpression, SelectorExpression)> list)
     {
-       var effect=Context.Effects.Find(x=> x.Name.Evaluate(scope!) is string a == postActionExpression.Name.Evaluate(scope!) is string b);
+       var effect=Context.Effects.Find(x=> x.Name.Evaluate(scope!).Equals(postActionExpression.Name.Evaluate(scope!) ));
        if(effect is null) throw new Exception($"Effect {postActionExpression.Name.Evaluate(scope!)} does not exist");
-       list.Add((effect,parent));//Llamar a Agustin y preguntar por selector xq el mismo si puede tener otro
+       list.Add((effect,parent)); 
        if(postActionExpression.Child is not null) return GetEffect(postActionExpression.Child,parent,list);
        return list;
     }

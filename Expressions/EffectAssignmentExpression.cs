@@ -48,7 +48,8 @@ public class EffectAssignmentExpression : Expressions
     public override object Evaluate(Scope scope)
     {   
         this.scope=scope;
-        var effect=Context.Effects.Find(x=> x.Name.Evaluate(scope!) is string a ==Name.Evaluate(scope!) is string b );
+        var name=Name.Evaluate(scope!);
+        var effect=Context.Effects.Find(x=> x.Name.Evaluate(scope!).Equals(name));
         if(effect is null) throw new Exception($"Effect does not exist {Name.Evaluate(scope).ToString()}");
 
         if(effect.Params is not null)

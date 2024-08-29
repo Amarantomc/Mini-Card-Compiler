@@ -36,9 +36,11 @@ public class  AssignmentExpression : Expressions
     public override object Evaluate(Scope scope)
     {   
         this.scope=scope;
+        CheckSemantic();
+        var right=Right.Evaluate(scope);
         if(FindVar(scope))
         {
-           var right=Right.Evaluate(scope);
+            
            VarExpression variable=null!;
            if(right is bool) variable=new VarExpression(Identifier.Var,Tokens.TokenType.BoolKeyword,right);
            if(right is double) variable=new VarExpression(Identifier.Var, Tokens.TokenType.NumberKeyword,right);
@@ -55,7 +57,7 @@ public class  AssignmentExpression : Expressions
         {
             if(Op.Type== Tokens.TokenType.Assignment || Op.Type== Tokens.TokenType.TwoDots)
             {
-                var right=Right.Evaluate(scope);
+                 
                 if(right is double) scope.Variables.Add(new VarExpression(Identifier.Var, Tokens.TokenType.Number,right));
                else if(right is string) scope.Variables.Add(new VarExpression(Identifier.Var, Tokens.TokenType.StringKeyword,right));
                 else if(right is bool) scope.Variables.Add(new VarExpression(Identifier.Var, Tokens.TokenType.BoolKeyword,right));
@@ -64,7 +66,7 @@ public class  AssignmentExpression : Expressions
             } else throw new Exception($"Invalid Assignment Expression for {Identifier.Var.Text}");
         }
 
-         return null!;
+         return right;
     }
 
     private VarExpression ReturnVar(Scope scope)

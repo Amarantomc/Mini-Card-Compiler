@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using GWent;
+using Logic;
 
 public class InExpression : Expressions
 {
@@ -25,7 +26,7 @@ public class InExpression : Expressions
     }
     public bool Evaluate(Scope scope, int index)
     {   //Chequeo que la colleccion coincida y exista
-        IEnumerable<object> cards=(FindScope(scope,Collection.Var.Text).Value is IEnumerable<object> x ?x: throw new Exception() ) ;
+        IEnumerable<Card> cards=(FindScope(scope,Collection.Var.Text).Value is IEnumerable<Card> x ?x: throw new Exception() ) ;
         if(FindVarInScope(scope,Var.Var.Text)) throw new Exception($"Already using this Variable {Var.Var.Text}");
         cards=cards.Skip(index);
         IEnumerator<object> enumerator=cards.GetEnumerator();

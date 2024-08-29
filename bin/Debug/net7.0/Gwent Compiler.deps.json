@@ -7,8 +7,19 @@
   "targets": {
     ".NETCoreApp,Version=v7.0": {
       "Gwent Compiler/1.0.0": {
+        "dependencies": {
+          "Logico Proyecto": "1.0.0.0"
+        },
         "runtime": {
           "Gwent Compiler.dll": {}
+        }
+      },
+      "Logico Proyecto/1.0.0.0": {
+        "runtime": {
+          "Logico Proyecto.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
@@ -16,6 +27,11 @@
   "libraries": {
     "Gwent Compiler/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Logico Proyecto/1.0.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

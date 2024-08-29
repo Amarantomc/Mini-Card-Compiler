@@ -26,10 +26,11 @@ public class Parser{
             if(token.Type!= Tokens.TokenType.WhiteSpace)
             Token.Add(token);
              
-        } // faltan propiedades de cartas
+        }  
           Properties=new List<Tokens.TokenType>{Tokens.TokenType.DeckKeyword, Tokens.TokenType.FieldKeyword,
          Tokens.TokenType.GraveyardKeyword, Tokens.TokenType.HandKeyword, Tokens.TokenType.NameKeyword, Tokens.TokenType.OwnerKeyword
-         , Tokens.TokenType.PowerKeyword, Tokens.TokenType.TriggerPlayerKeyword, Tokens.TokenType.TypeKeyword, Tokens.TokenType.BoardKeyword};
+         , Tokens.TokenType.PowerKeyword, Tokens.TokenType.TriggerPlayerKeyword, Tokens.TokenType.TypeKeyword, Tokens.TokenType.BoardKeyword,
+          Tokens.TokenType.FactionKeyword, Tokens.TokenType.RangeKeyword};
 
          Functions=new List<Tokens.TokenType>{ Tokens.TokenType.DeckOfPlayerKeyword, Tokens.TokenType.FieldOfPlayerKeyword,
                    Tokens.TokenType.FindKeyword, Tokens.TokenType.GraveyardOfPlayerKeyword, Tokens.TokenType.PopKeyword, Tokens.TokenType.PushKeyword,
@@ -37,23 +38,166 @@ public class Parser{
          
         
     } 
+       public SyntaxTree Parse(){
+      SyntaxTree syntaxTree=new SyntaxTree();
+      while (CanLookAhead(1) && CurrentToken.Type!= Tokens.TokenType.End)
+      {
+        var expresion= ParseGlobalExpresion();
+        syntaxTree.root.Enqueue(expresion);
+      }
+       
+      return syntaxTree;
+     } 
 
-    private Tokens NextToken(){
-     Tokens token = CurrentToken;
-        position++;
-
-        return token;
-        
-    }  
-     private Tokens Match( Tokens.TokenType type){
+       private Expressions ParseGlobalExpresion(){
+         if(CurrentToken.Type == Tokens.TokenType.EffectKeyword)
+         {
+            return EffectExpressions();
+         }
+         else if(CurrentToken.Type == Tokens.TokenType.CardKeyword)
+         {
+            return CardExpressions();
+         }
+         else if( CurrentToken.Type== Tokens.TokenType.ForKeyword)
+         {
+             return ForExpressions();
+         }
+           else if( CurrentToken.Type== Tokens.TokenType.WhileKeyword)
+         {
+            return WhileExpression();
+         }
+          else if( CurrentToken.Type== Tokens.TokenType.Identifier)
+          {
+              if(LookAhead(1).Type== Tokens.TokenType.Assignment || LookAhead(1).Type== Tokens.TokenType.EOF || LookAhead(1).Type== Tokens.TokenType.PlusEquals || 
+               LookAhead(1).Type== Tokens.TokenType.MinusEquals ||LookAhead(1).Type== Tokens.TokenType.MullEquals ||LookAhead(1).Type== Tokens.TokenType.DivEquals
+               || LookAhead(1).Type== Tokens.TokenType.TwoDots )
+               {
+                 return AssignmentExpressions();
+               }
+              
+               
+          }
+            return OrExpressions();
+       }
       
-        if(CurrentToken.Type==type) return NextToken();
-         Error.ErrorList.Add(new Error(Error.ErrorType.Semantic, position, "Unexpected type: "+ CurrentToken.Type.ToString()+", Expected type "+type.ToString()));
-         NextToken();
-        return new Tokens(null!, CurrentToken.Position, type, null!); 
-     }
-     
-       private Expressions Factor()
+        private Expressions OrExpressions()
+    {
+       var left=AndExpressions();
+      while(CurrentToken.Type== Tokens.TokenType.Or)
+      {
+        var op=NextToken();
+        var right=OrExpressions();
+        left=new BinaryExpression(left,op,right);
+
+      }
+      return left;
+
+
+    }
+
+    private Expressions AndExpressions()
+    {
+         var left=CompareExpressions();
+      while(CurrentToken.Type== Tokens.TokenType.And)
+      {
+        var op=NextToken();
+        var right=OrExpressions();
+        left=new BinaryExpression(left,op,right);
+
+      }
+      return left;
+    }
+
+    private Expressions CompareExpressions()
+    {
+         Expressions left=ConcatExpressions();
+          while(CurrentToken.Type== Tokens.TokenType.Greater|| CurrentToken.Type== Tokens.TokenType.GreaterEquals||
+                CurrentToken.Type== Tokens.TokenType.Less|| CurrentToken.Type== Tokens.TokenType.LessEquals
+                || CurrentToken.Type== Tokens.TokenType.EqualsEquals)
+      {
+        var op=NextToken();
+        var right=ConcatExpressions();
+        left=new BinaryExpression(left,op,right);
+
+      }
+      return left;
+    }
+
+    private Expressions ConcatExpressions()
+    {
+         Expressions left=ArithmeticExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Concat || CurrentToken.Type== Tokens.TokenType.TwoConcats)
+         {
+           var op=NextToken();
+           var right=ArithmeticExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions ArithmeticExpressions()
+    {
+         Expressions left=ArithmeticMulOrDivExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Plus || CurrentToken.Type== Tokens.TokenType.Minus)
+         {
+           var op=NextToken();
+           var right=ArithmeticMulOrDivExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions ArithmeticMulOrDivExpressions()
+    {
+          Expressions left=PowExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Mull || CurrentToken.Type== Tokens.TokenType.Div)
+         {
+           var op=NextToken();
+           var right=PowExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions PowExpressions()
+    {
+          Expressions left=IncrementExpressions();
+         while (CurrentToken.Type== Tokens.TokenType.Pow)
+         {
+           var op= NextToken();
+           var right=IncrementExpressions();
+           left=new BinaryExpression(left,op,right);
+         }
+         return left;
+    }
+
+    private Expressions IncrementExpressions()
+    {
+         Expressions left=DotExpressions();
+         if(CurrentToken.Type== Tokens.TokenType.PlusPlus|| CurrentToken.Type== Tokens.TokenType.MinusMinus)
+         {
+           var op=NextToken();
+            
+           left=new UnaryExpression(op,left);
+         }
+         return left;
+    }
+
+    private Expressions DotExpressions()
+    {
+       Expressions left=Factor();
+         while (CurrentToken.Type== Tokens.TokenType.Dot)
+         {
+           var op= NextToken();
+           var right=Factor();
+
+            
+           left=new DotExpression(left,op,right);
+         }
+         return left;  
+    }
+    
+    private Expressions Factor()
     {
         switch (CurrentToken.Type)
         {   
@@ -98,6 +242,7 @@ public class Parser{
                    
                }
                Match(Tokens.TokenType.CloseKey);
+               Match(Tokens.TokenType.EOF);
                return new Statement(expressions.ToArray());
             } 
 
@@ -201,57 +346,7 @@ public class Parser{
         
        
     } 
-     
-
-       private Expressions ParseGlobalExpresion(){
-         if(CurrentToken.Type == Tokens.TokenType.EffectKeyword)
-         {
-            return EffectExpressions();
-         }
-         else if(CurrentToken.Type == Tokens.TokenType.CardKeyword)
-         {
-            return CardExpressions();
-         }
-         else if( CurrentToken.Type== Tokens.TokenType.ForKeyword)
-         {
-             return ForExpressions();
-         }
-           else if( CurrentToken.Type== Tokens.TokenType.WhileKeyword)
-         {
-            return WhileExpression();
-         }
-          else if( CurrentToken.Type== Tokens.TokenType.Identifier)
-          {
-              if(LookAhead(1).Type== Tokens.TokenType.Assignment || LookAhead(1).Type== Tokens.TokenType.EOF || LookAhead(1).Type== Tokens.TokenType.PlusEquals || 
-               LookAhead(1).Type== Tokens.TokenType.MinusEquals ||LookAhead(1).Type== Tokens.TokenType.MullEquals ||LookAhead(1).Type== Tokens.TokenType.DivEquals
-               || LookAhead(1).Type== Tokens.TokenType.TwoDots )
-               {
-                 return AssignmentExpressions();
-               }
-              
-               
-          }
-           
-        
-        
-        return OrExpressions();
-       }
-     public SyntaxTree Parse(){
-        
-      var expresion= ParseGlobalExpresion();
-      var EOF= Match(Tokens.TokenType.EOF);
-      if(EOF.Text!=";") Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,position,"; was Expected"));
-      return new SyntaxTree(expresion,EOF);
-     } 
-
-     private Tokens LookAhead(int n=0){
-       return Token[position+n];
-     }
-
-     private bool CanLookAhead(int n=0){
-       return Token.Count -position> n;
-     }
-
+    
     private Expressions WhileExpression(){
 
       NextToken();
@@ -357,6 +452,7 @@ public class Parser{
            }
         }
          Match(Tokens.TokenType.CloseKey);
+          
          return new EffectExpression(name,action,effectParams);
 
        
@@ -504,6 +600,7 @@ public class Parser{
              
              
         }
+         Match(Tokens.TokenType.CloseKey);
          return new CardExpression(name,type,faction,power,range,onActivation);
     }
 
@@ -514,6 +611,7 @@ public class Parser{
         
          
         List<Statement> statements=new List<Statement>();
+        List<Expressions> aux=new List<Expressions>();
         SelectorExpression selectorExpression=null!;
         PostActionExpression postAction=null!;
         EffectAssignmentExpression effect=new EffectAssignmentExpression();
@@ -528,16 +626,21 @@ public class Parser{
             {
                 if(CurrentToken.Type== Tokens.TokenType.SelectorKeyword)
                  {
+                  
                    if(selectorExpression is null) selectorExpression=SelectorExpressions();
+                  
                    else{
+
                       Error.ErrorList.Add(new Error(Error.ErrorType.Semantic,CurrentToken.Position,"Cannot have many Selectors in the same block"));
                       break;
+
                    }
-                   
+                     aux.Add(selectorExpression);
                  }
                 else if(CurrentToken.Type== Tokens.TokenType.PostActionKeyword)
                 {
                   postAction=PostActionExpressions();
+                  aux.Add(postAction);
                 } 
                 else if(CurrentToken.Type== Tokens.TokenType.EffectCardKeyword)
               { 
@@ -583,8 +686,9 @@ public class Parser{
                 var idExpression=new VarExpression(id);
                 var op=LookAhead(-1);
                  effect.Name=new AssignmentExpression(idExpression,op,OrExpressions());
-                NextToken();
+                
             } 
+               aux.Add(effect);
              } else
              {
                Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Invalid Token "));
@@ -597,25 +701,22 @@ public class Parser{
               Match(Tokens.TokenType.CloseKey);
               if(CurrentToken.Type== Tokens.TokenType.Coma) NextToken();
                
-              statements.Add(new Statement(postAction,selectorExpression,effect));
-              effect=null!;
+              statements.Add(new Statement(aux.ToArray()));
+              aux.Clear();
+              effect=new EffectAssignmentExpression();
               postAction=null!;
               selectorExpression=null!;
                
 
             }
 
-             
-            
-              
-              
-            else{
+             else{
                 Error.ErrorList.Add(new Error(Error.ErrorType.Semantic,CurrentToken.Position,"Unexpected token "+ CurrentToken.Text));
                NextToken();
                return null!;
               }
              
-             if(CurrentToken.Type== Tokens.TokenType.OpenKey|| CurrentToken.Type== Tokens.TokenType.Coma|| CurrentToken.Type== Tokens.TokenType.CloseKey) continue;
+             if(CurrentToken.Type== Tokens.TokenType.OpenKey|| CurrentToken.Type== Tokens.TokenType.Coma|| CurrentToken.Type== Tokens.TokenType.CloseKey|| CurrentToken.Type== Tokens.TokenType.CloseBracket) continue;
              else{
                 Error.ErrorList.Add(new Error(Error.ErrorType.Syntax,CurrentToken.Position,"Missing ,"));
                NextToken();
@@ -749,121 +850,27 @@ public class Parser{
       
 
     }
+    
+    private Tokens NextToken(){
+     Tokens token = CurrentToken;
+        position++;
 
-    private Expressions OrExpressions()
-    {
-       var left=AndExpressions();
-      while(CurrentToken.Type== Tokens.TokenType.Or)
-      {
-        var op=NextToken();
-        var right=OrExpressions();
-        left=new BinaryExpression(left,op,right);
+        return token;
+        
+    }  
+     private Tokens Match( Tokens.TokenType type){
+      
+        if(CurrentToken.Type==type) return NextToken();
+         Error.ErrorList.Add(new Error(Error.ErrorType.Semantic, position, "Unexpected type: "+ CurrentToken.Type.ToString()+", Expected type "+type.ToString()));
+         NextToken();
+        return new Tokens(null!, CurrentToken.Position, type, null!); 
+     }
+     
+     private Tokens LookAhead(int n=0){
+       return Token[position+n];
+     }
 
-      }
-      return left;
-
-
-    }
-
-    private Expressions AndExpressions()
-    {
-         var left=CompareExpressions();
-      while(CurrentToken.Type== Tokens.TokenType.And)
-      {
-        var op=NextToken();
-        var right=OrExpressions();
-        left=new BinaryExpression(left,op,right);
-
-      }
-      return left;
-    }
-
-    private Expressions CompareExpressions()
-    {
-         Expressions left=ConcatExpressions();
-          while(CurrentToken.Type== Tokens.TokenType.Greater|| CurrentToken.Type== Tokens.TokenType.GreaterEquals||
-                CurrentToken.Type== Tokens.TokenType.Less|| CurrentToken.Type== Tokens.TokenType.LessEquals
-                || CurrentToken.Type== Tokens.TokenType.EqualsEquals)
-      {
-        var op=NextToken();
-        var right=ConcatExpressions();
-        left=new BinaryExpression(left,op,right);
-
-      }
-      return left;
-    }
-
-    private Expressions ConcatExpressions()
-    {
-         Expressions left=ArithmeticExpressions();
-         while (CurrentToken.Type== Tokens.TokenType.Concat || CurrentToken.Type== Tokens.TokenType.TwoConcats)
-         {
-           var op=NextToken();
-           var right=ArithmeticExpressions();
-           left=new BinaryExpression(left,op,right);
-         }
-         return left;
-    }
-
-    private Expressions ArithmeticExpressions()
-    {
-         Expressions left=ArithmeticMulOrDivExpressions();
-         while (CurrentToken.Type== Tokens.TokenType.Plus || CurrentToken.Type== Tokens.TokenType.Minus)
-         {
-           var op=NextToken();
-           var right=ArithmeticMulOrDivExpressions();
-           left=new BinaryExpression(left,op,right);
-         }
-         return left;
-    }
-
-    private Expressions ArithmeticMulOrDivExpressions()
-    {
-          Expressions left=PowExpressions();
-         while (CurrentToken.Type== Tokens.TokenType.Mull || CurrentToken.Type== Tokens.TokenType.Div)
-         {
-           var op=NextToken();
-           var right=PowExpressions();
-           left=new BinaryExpression(left,op,right);
-         }
-         return left;
-    }
-
-    private Expressions PowExpressions()
-    {
-          Expressions left=IncrementExpressions();
-         while (CurrentToken.Type== Tokens.TokenType.Pow)
-         {
-           var op= NextToken();
-           var right=IncrementExpressions();
-           left=new BinaryExpression(left,op,right);
-         }
-         return left;
-    }
-
-    private Expressions IncrementExpressions()
-    {
-         Expressions left=DotExpressions();
-         if(CurrentToken.Type== Tokens.TokenType.PlusPlus|| CurrentToken.Type== Tokens.TokenType.MinusMinus)
-         {
-           var op=NextToken();
-            
-           left=new UnaryExpression(op,left);
-         }
-         return left;
-    }
-
-    private Expressions DotExpressions()
-    {
-       Expressions left=Factor();
-         while (CurrentToken.Type== Tokens.TokenType.Dot)
-         {
-           var op= NextToken();
-           var right=Factor();
-
-            
-           left=new DotExpression(left,op,right);
-         }
-         return left;  
-    }
+     private bool CanLookAhead(int n=0){
+       return Token.Count -position> n;
+     }
 }

@@ -35,7 +35,7 @@ public class CardExpression : Expressions
     {
         
         if(Name is null || Name.Evaluate(scope!) is not string) throw new Exception("Name does not exist");
-        if(TypeCard is null || types.Contains(TypeCard.Evaluate(scope!))) throw new Exception("Type does not exist");
+        if(TypeCard is null || !types.Contains(TypeCard.Evaluate(scope!))) throw new Exception("Type does not exist");
 
         if(TypeCard.Evaluate(scope!) is string type)
         { 
@@ -74,29 +74,46 @@ public class CardExpression : Expressions
             foreach(Expressions expression in expressions) 
             {   
                 string range=(expression.Evaluate(scope!) is string y) ? y: throw new Exception("Range must be a String Type");
-                
-                if( range == "Melee" && !result[0] ) 
+
+            switch (range)
+            {
+                case "Melee":
                 {
-                     result[0]= true;
+                    if(!result[0])
+                    {
+                        result[0]=true;
+                        continue;
+                    }
+                    throw new Exception("Semantic Error only can be one Melee");
+
+                }
                      
-                }
-            else { throw new Exception("Semantic Error only can be one Melee"); }
-            
-             if ( range == "Ranged" && !result[1])
-                {
-                      result[1] = true;
-                    
-                }
-            else { throw new Exception("Semantic Error only can be one Ranged"); }
-             
-             if ( range == "Siege" && !result[2])
-                {
-                      result[2] = true;
-                    
-                }
-            else { throw new Exception("Semantic Error only can be one Siege"); }
-                
+                case "Ranged":
+                 
+                 if(!result[1])
+                    {
+                        result[1]=true;
+                        continue;
+                    }
+                    throw new Exception("Semantic Error only can be one Ranged");
+
+                case "Siege":
+                 
+                 if(!result[2])
+                    {
+                        result[2]=true;
+                        continue;
+                    }
+                    throw new Exception("Semantic Error only can be one Siege");
+
+
+                default:
                 throw new Exception($"Unexpected Token {range}, Expected 'Melee', 'Ranged' o 'Siege' "); 
+                    
+            }
+
+            
+                
             }
 
             return result;
@@ -106,16 +123,72 @@ public class CardExpression : Expressions
     {
          this.scope=scope;
          CheckSemantic();
-         var name=Name.Evaluate(scope);
-         var type=TypeCard.Evaluate(scope);
-         var faction=Faction.Evaluate(scope);
-         var power= Power.Evaluate(scope);
-         var range=RangeMethod(Range);
+         Card card=null!;
+         UnitsCard.AtackType ranged=0;
+
+         string name=(string)Name.Evaluate(scope);
+         string type=(string)TypeCard.Evaluate(scope);
+         string faction=(string)Faction.Evaluate(scope);
+         double power;
+         bool [] range;
+
+          if(type== "Oro" || type=="Plata")
+         {
+            power=(double)Power.Evaluate(scope);
+            range=RangeMethod(Range);
+            UnitsCard.UnitType unitType=(type=="Oro")? UnitsCard.UnitType.Gold: UnitsCard.UnitType.Silver; 
+            string auxRange="";
+            if(range[0]) auxRange+="M";
+            if(range[1]) auxRange+="R";
+            if(range[2]) auxRange+="S";
+            for(int i=0;i<=6;i++)
+            { 
+                UnitsCard.AtackType atack=(UnitsCard.AtackType)i;
+                if(auxRange==atack.ToString()) 
+
+                {
+                    ranged=atack;
+                    break;
+                }
+            }
+
+            card=new UnitsCard(name,faction,(int)power,ranged,unitType,new NoEffect());
+              
+         } 
+         else if(type=="Clima"|| type=="Aumento")
+         {
+            range=RangeMethod(Range);
+            string auxRange="";
+            if(range[0]) auxRange+="M";
+            if(range[1]) auxRange+="R";
+            if(range[2]) auxRange+="S";
+            //No se que hacer con las filas
+            for(int i=0;i<=6;i++)
+            { 
+                UnitsCard.AtackType atack=(UnitsCard.AtackType)i;
+                if(auxRange==atack.ToString()) 
+
+                {
+                    ranged=atack;
+                    break;
+                }
+            }
+            if(type=="Clima") card=new WeatherCard(name,faction,new NoEffect());
+            else card=new Increase(name,faction,new NoEffect());
+            
+
+         } else if(type=="Lider")
+         {
+            card=new BossCard(name,faction,0,new NoEffect());
+         }
+         
+       
+
           
          List<(EffectExpression,SelectorExpression)> result=new List<(EffectExpression, SelectorExpression)>();
          OnActivation.Evaluate(scope);
-            
-               return 0;
+        
+               return card;
          
 
           

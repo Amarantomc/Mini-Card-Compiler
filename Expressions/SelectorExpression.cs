@@ -10,7 +10,7 @@ public class SelectorExpression : Expressions
     public LambdaExpression ?Predicate{get;}
 
     private Scope? scope{get;set;}
-    private string [] source={"hand","otherHand","deck","otherDeck","field","board","otherField"};
+    private string [] source={"hand","otherHand","deck","otherDeck","field","board","otherField","parent"};
 
     public SelectorExpression(AssignmentExpression source, AssignmentExpression single, LambdaExpression predicate)
     {
@@ -55,9 +55,12 @@ public class SelectorExpression : Expressions
     }
 
     public override object Evaluate(Scope scope)
-    {    //No completado
-         var soucre=Source.Evaluate(scope);
+    {     
+         string source=(string)Source.Evaluate(scope);
          bool single=(Single is null)? false: (bool)Single.Right.Evaluate(scope!);
-         return 0;
+         Predicate<VarExpression> predicate= (Predicate<VarExpression>)Predicate!.Evaluate(scope);
+         
+
+         return (source,single,predicate);
     }
 }
