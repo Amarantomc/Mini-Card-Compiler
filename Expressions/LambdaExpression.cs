@@ -73,6 +73,7 @@ public class LambdaExpression : Expressions
                 expression=item;
             }
             Predicate<VarExpression> predicate=(expression) => (bool)Body.Expressions.First().Evaluate(scope);
+            
             return predicate;
          }
          throw new Exception("Invalid Operation");

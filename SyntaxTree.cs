@@ -22,7 +22,7 @@ public class SyntaxTree{
     }
 
     public List<Card> Visitor()
-    {
+    {    //Puedo setear yo mismo el IEnumerable en el scope 
         List<Card> result=new List<Card>();
         Scope scope=new Scope();
         foreach (Expressions item in root)

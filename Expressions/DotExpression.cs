@@ -23,7 +23,13 @@ public class DotExpression : Expressions
 
     public override object Evaluate(Scope scope)
     {
-        return 0;
+        var left=Left.Evaluate(scope);
+        var right=Right.Evaluate(scope);
+        if(left.Equals("context"))
+        {
+            //Lamar a metodo en unity
+        }
+        return true;
          
     }
 }

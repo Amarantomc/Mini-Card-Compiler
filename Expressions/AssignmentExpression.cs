@@ -47,10 +47,26 @@ public class  AssignmentExpression : Expressions
            if(right is string) variable=new VarExpression(Identifier.Var, Tokens.TokenType.StringKeyword,right);
            VarExpression var=ReturnVar(scope);
             if(Op.Type== Tokens.TokenType.Assignment) var.Value=variable!.Value;
-            if(Op.Type== Tokens.TokenType.PlusEquals && var.Value is double x && variable!.Value is double y) x+=y;
-            if(Op.Type== Tokens.TokenType.MinusEquals && var.Value is double v && variable!.Value is double w) v-=w;
-            if(Op.Type== Tokens.TokenType.MullEquals && var.Value is double a && variable!.Value is double b) a*=b;
-            if(Op.Type== Tokens.TokenType.DivEquals && var.Value is double c && variable!.Value is double d) c/=d;
+            else if(Op.Type== Tokens.TokenType.PlusEquals && var.Value is double x && variable!.Value is double y)
+            {   x+=y;
+                var.Value=x;
+            } 
+            else if(Op.Type== Tokens.TokenType.MinusEquals && var.Value is double v && variable!.Value is double w)
+            {
+                v-=w;
+                var.Value=v;
+            } 
+           else if(Op.Type== Tokens.TokenType.MullEquals && var.Value is double a && variable!.Value is double b)
+            {
+                a*=b;
+                var.Value=a;
+            } 
+           else if(Op.Type== Tokens.TokenType.DivEquals && var.Value is double c && variable!.Value is double d)
+            {
+                c/=d;
+                var.Value=c;
+            }
+            else throw new Exception($"Invalid operation between {var.Value!.GetType()}, {variable.Value!} whith the operator {Op.Text}");
 
             
         } else if(!FindVar(scope))

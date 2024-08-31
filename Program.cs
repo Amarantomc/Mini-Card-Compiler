@@ -2,7 +2,7 @@
 using Logic;
 
 
-internal class Program
+internal class Program 
 { 
     
     private static void Main(string[] args)
@@ -74,7 +74,8 @@ internal class Program
          
          var tree=SyntaxTree.Parse(input5+input1+input2);
           List<Card> f= tree.Visitor();
-        
+          
+          
        
     }
 }

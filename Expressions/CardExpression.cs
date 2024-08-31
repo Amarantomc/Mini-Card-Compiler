@@ -185,8 +185,16 @@ public class CardExpression : Expressions
        
 
           
-         List<(EffectExpression,SelectorExpression)> result=new List<(EffectExpression, SelectorExpression)>();
-         OnActivation.Evaluate(scope);
+         List<(EffectExpression,SelectorExpression)> aux=(List<(EffectExpression,SelectorExpression)>)OnActivation.Evaluate(scope);
+         List<(Action,(string,bool,Predicate<VarExpression>))> result= new List<(Action,( string, bool, Predicate<VarExpression>))>();
+         
+         foreach (var item in aux)
+         {  
+            Action action=(Action)item.Item1.Evaluate(scope);
+            (string,bool,Predicate<VarExpression>) selector= ((string, bool, Predicate<VarExpression>))item.Item2.Evaluate(scope);
+            
+            result.Add((action,selector));
+         }
         
                return card;
          
